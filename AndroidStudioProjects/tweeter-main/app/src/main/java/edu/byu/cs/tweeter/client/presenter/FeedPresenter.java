@@ -37,9 +37,9 @@ public class FeedPresenter implements StatusService.getFeedObserver, UserService
     }
 
 
-    public void getUser(AuthToken authToken, String alias){
+    public void getUser(AuthToken authToken, String clickable){
         var UserService = new UserService();
-        UserService.getUser(authToken, alias, this);
+        UserService.getUser(authToken, clickable, this);
         view.showInfoMessage("Getting user's profile...");
     }
 

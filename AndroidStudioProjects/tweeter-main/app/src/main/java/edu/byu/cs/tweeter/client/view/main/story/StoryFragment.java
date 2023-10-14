@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
@@ -30,13 +29,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import edu.byu.cs.tweeter.R;
 import edu.byu.cs.tweeter.client.cache.Cache;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetStoryTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
 import edu.byu.cs.tweeter.client.presenter.StoryPresenter;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.Status;
@@ -147,6 +142,8 @@ public class StoryFragment extends Fragment implements StoryPresenter.View{
         private final TextView post;
         private final TextView datetime;
 
+        private String clickable;
+
         /**
          * Creates an instance and sets an OnClickListener for the status's row.
          *
@@ -193,14 +190,15 @@ public class StoryFragment extends Fragment implements StoryPresenter.View{
                         int start = s.getSpanStart(this);
                         int end = s.getSpanEnd(this);
 
-//                        String clickable = s.subSequence(start, end).toString();
+                        clickable = s.subSequence(start, end).toString();
 
 //                        GetUserTask getUserTask = new GetUserTask(Cache.getInstance().getCurrUserAuthToken(),
 //                                clickable, new GetUserHandler());
 //                        ExecutorService executor = Executors.newSingleThreadExecutor();
 //                        executor.execute(getUserTask);
 //                        Toast.makeText(getContext(), "Getting user's profile...", Toast.LENGTH_LONG).show();
-//
+
+                        presenter.getUser(Cache.getInstance().getCurrUserAuthToken(), clickable);
                     }
 
                     @Override

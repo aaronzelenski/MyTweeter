@@ -42,11 +42,8 @@ public class FollowingPresenter implements FollowingService.GetFollowingObserver
         void setLoading(boolean value);
         void addItems(List<User> newUsers);
         void displayErrorMessage(String message);
-
         void showInfoMessage(String s);
-
         void showErrorMessage(String message);
-
         void openMainView(User user);
     }
 
@@ -173,10 +170,10 @@ public class FollowingPresenter implements FollowingService.GetFollowingObserver
     }
 
 
-    public void getUser(AuthToken authToken, String alias) {
+    public void getUser(AuthToken authToken, String clickable) {
 
         var userService = new UserService();
-        userService.getUser(authToken, alias, this);
+        userService.getUser(authToken, clickable, this);
         view.showInfoMessage("Getting user's profile...");
 
     }

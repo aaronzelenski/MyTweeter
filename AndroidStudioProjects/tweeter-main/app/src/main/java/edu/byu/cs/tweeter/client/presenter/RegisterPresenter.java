@@ -3,13 +3,11 @@ package edu.byu.cs.tweeter.client.presenter;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.widget.ImageView;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
 
 import edu.byu.cs.tweeter.client.model.service.RegisterService;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -71,6 +69,7 @@ public class RegisterPresenter implements RegisterService.RegisterObserver{
             view.showInfoMessage("Registering...");
 
 
+            // put this code into the view...
             Bitmap bitmap = ((BitmapDrawable) image).getBitmap();
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);

@@ -1,19 +1,10 @@
 package edu.byu.cs.tweeter.client.presenter;
 
-import android.view.View;
-import android.widget.Toast;
-
-import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetStoryTask;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
-import edu.byu.cs.tweeter.client.view.main.story.StoryFragment;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -46,11 +37,9 @@ public class StoryPresenter implements UserService.GetUserObserver, StatusServic
     }
 
 
-    public void getUser(AuthToken authToken, String alias){
-
+    public void getUser(AuthToken authToken, String clickable){
         var userService = new UserService();
-        userService.getUser(authToken,alias,this);
-
+        userService.getUser(authToken, clickable, this);
         view.showInfoMessage("Getting user's profile...");
     }
 
