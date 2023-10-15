@@ -4,11 +4,11 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.UserService;
-import edu.byu.cs.tweeter.client.model.service.FollowerService;
+import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class FollowerPresenter implements UserService.GetUserObserver, FollowerService.GetFollowersObserver{
+public class FollowerPresenter implements UserService.GetUserObserver, FollowService.GetFollowersObserver{
 
     private View view;
     private User user;
@@ -69,7 +69,7 @@ public class FollowerPresenter implements UserService.GetUserObserver, FollowerS
             isLoading = true;
             view.startingLoading();
 
-            var FollowerService = new FollowerService();
+            var FollowerService = new FollowService();
             FollowerService.getFollowers(Cache.getInstance().getCurrUserAuthToken(), user
                     ,PAGE_SIZE, lastFollower, this);
         }

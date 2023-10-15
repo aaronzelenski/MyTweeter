@@ -5,21 +5,22 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import java.util.List;
+
 //import edu.byu.cs.tweeter.client.model.service.*;
-import edu.byu.cs.tweeter.client.model.service.UserService;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.LoginTask;
-import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.client.model.service.FollowService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
 import edu.byu.cs.tweeter.model.domain.User;
 
 /**
  * Handles messages from the background task indicating that the task is done, by invoking
  * methods on the observer.
  */
-public class LoginTaskHandler extends HandlerGeneral {
+public class GetFollowingHandler extends HandlerGeneral {
 
-    private final UserService.LoginObserver observer;
+    private final FollowService.GetFollowingObserver observer;
 
-    public LoginTaskHandler(UserService.LoginObserver observer) {
+    public GetFollowingHandler(FollowService.GetFollowingObserver observer) {
         super(Looper.getMainLooper());
         this.observer = observer;
     }
@@ -27,9 +28,9 @@ public class LoginTaskHandler extends HandlerGeneral {
     @Override
     protected void handleSuccess(Message msg) {
         Bundle bundle = msg.getData();
-        User user = (User) bundle.getSerializable(LoginTask.USER_KEY);
-        AuthToken authToken = (AuthToken) bundle.getSerializable(LoginTask.AUTH_TOKEN_KEY);
-        observer.handleSuccess(user, authToken);
+        List<User> followees = (List<User>) bundle.getSerializable(GetFollowingTask.ITEMS_KEY);
+        boolean hasMorePages = bundle.getBoolean(GetFollowingTask.MORE_PAGES_KEY);
+        observer.handleSuccess(followees, hasMorePages);
     }
 
     @Override

@@ -1,18 +1,34 @@
 package edu.byu.cs.tweeter.client.model.service;
-
 import java.util.List;
-
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.*;
-//import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowingTaskHandler;
-import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowingTaskHandler;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.BackgroundTaskUtils;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowersHandler;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.handler.GetFollowingHandler;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
-/**
- * Contains the business logic for getting the users a user is following.
- */
-public class FollowingService {
+public class FollowService {
 
+    // ------------------- GetFollowers ------------------- //
+
+    public interface GetFollowersObserver {
+        void getFollowersSuccess(List<User> followers, boolean hasMorePages);
+        void getFollowersFailed(String message);
+        void handleException(Exception exception);
+    }
+    public void getFollowers(AuthToken authToken, User user, int pageSize, User lastFollower, GetFollowersObserver observer) {
+        GetFollowersTask getFollowersTask = new GetFollowersTask(authToken,
+                user, pageSize, lastFollower, new GetFollowersHandler(observer));
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(getFollowersTask);
+    }
+
+
+
+    // ------------------- GetFollowing ------------------- //
     /**
      * An observer interface to be implemented by observers who want to be notified when
      * asynchronous operations complete.
@@ -26,7 +42,7 @@ public class FollowingService {
     /**
      * Creates an instance.
      */
-    public FollowingService() {}
+    public FollowService() {}
 
     /**
      * Requests the users that the user specified in the request is following.
@@ -53,7 +69,6 @@ public class FollowingService {
      */
     // This method is public so it can be accessed by test cases
     public GetFollowingTask getGetFollowingTask(AuthToken authToken, User targetUser, int limit, User lastFollowee, GetFollowingObserver observer) {
-        return new GetFollowingTask(authToken, targetUser, limit, lastFollowee, new GetFollowingTaskHandler(observer));
+        return new GetFollowingTask(authToken, targetUser, limit, lastFollowee, new GetFollowingHandler(observer));
     }
-
 }

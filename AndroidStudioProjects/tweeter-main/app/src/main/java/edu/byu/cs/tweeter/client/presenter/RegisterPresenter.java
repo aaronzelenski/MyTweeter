@@ -7,11 +7,11 @@ import android.graphics.drawable.Drawable;
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
 
-import edu.byu.cs.tweeter.client.model.service.RegisterService;
+import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class RegisterPresenter implements RegisterService.RegisterObserver{
+public class RegisterPresenter implements UserService.RegisterObserver{
 
     View view;
 
@@ -79,8 +79,8 @@ public class RegisterPresenter implements RegisterService.RegisterObserver{
             String imageBytesBase64 = Base64.getEncoder().encodeToString(imageBytes);
 
 
-            var registerService = new RegisterService();
-            registerService.register(firstName, lastName, alias, password, imageBytesBase64,this);
+            var userService = new UserService();
+            userService.register(firstName, lastName, alias, password, imageBytesBase64,this);
         }
     }
 

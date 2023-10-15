@@ -52,13 +52,8 @@ public class FeedPresenter implements StatusService.getFeedObserver, UserService
         if (!isLoading) {   // This guard is important for avoiding a race condition in the scrolling code.
             isLoading = true;
             view.startingLoading();
-
             var feedService = new StatusService();
             feedService.getFeed(Cache.getInstance().getCurrUserAuthToken(), user, PAGE_SIZE,lastStatus,this);
-
-
-
-
         }
     }
 
