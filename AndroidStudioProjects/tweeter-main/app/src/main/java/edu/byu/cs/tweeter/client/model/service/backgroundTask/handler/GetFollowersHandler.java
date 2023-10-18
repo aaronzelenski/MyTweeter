@@ -8,7 +8,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class GetFollowersHandler extends HandlerGeneral {
 
-    private FollowService.GetFollowersObserver observer;
+    private final FollowService.GetFollowersObserver observer;
 
     public GetFollowersHandler(FollowService.GetFollowersObserver observer) {
         super(Looper.getMainLooper());

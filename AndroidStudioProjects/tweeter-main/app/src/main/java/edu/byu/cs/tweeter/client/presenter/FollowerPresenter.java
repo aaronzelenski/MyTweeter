@@ -1,40 +1,19 @@
 package edu.byu.cs.tweeter.client.presenter;
-
 import java.util.List;
-
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class FollowerPresenter implements UserService.GetUserObserver, FollowService.GetFollowersObserver{
+public class FollowerPresenter extends PagedPresenter<User> implements UserService.GetUserObserver, FollowService.GetFollowersObserver {
 
-    private View view;
-    private User user;
-
+    private final PagedView<User> view;
+    private final User user;
     private User lastFollower;
-    private boolean hasMorePages; // anytime there is any paging, we put this in the presenter
-    private boolean isLoading = false;
 
-    private static final int PAGE_SIZE = 10;
-
-
-    public interface View {
-
-        void showInfoMessage(String message);
-        void showErrorMessage(String message);
-
-        void openMainView(User user);
-
-        void startingLoading();
-
-        void endingLoading();
-
-        void addItems(List<User> followers);
-    }
-
-    public FollowerPresenter(View view, User user) {
+    public FollowerPresenter(PagedView<User> view, User user) {
         this.view = view;
         this.user = user;
     }
@@ -55,7 +34,7 @@ public class FollowerPresenter implements UserService.GetUserObserver, FollowSer
     }
 
     @Override
-    public void getUserFailed(String message) {
+    public void handleFailure(String message) {
         view.showErrorMessage(message);
 
     }
@@ -94,16 +73,7 @@ public class FollowerPresenter implements UserService.GetUserObserver, FollowSer
 
     @Override
     public void handleException(Exception exception) {
-
     }
-
-    public boolean getIsLoading() {
-        return isLoading;
-    }
-
-public boolean getHasMorePages(){
-        return hasMorePages;
-}
 
 
 

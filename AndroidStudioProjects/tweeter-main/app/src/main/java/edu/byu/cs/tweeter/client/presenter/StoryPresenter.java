@@ -9,29 +9,15 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
-public class StoryPresenter implements UserService.GetUserObserver, StatusService.getStatusObserver {
+public class StoryPresenter extends PagedPresenter<Status> implements UserService.GetUserObserver, StatusService.getStatusObserver {
 
-    private View view;
-    private User user;
-    private static final int PAGE_SIZE = 10;
+    private final PagedView<Status> view;
+    private final User user;
     private Status lastStatus;
-    private boolean hasMorePages;
-    private boolean isLoading = false;
 
 
 
-
-    public interface View{
-        void showInfoMessage(String message);
-        void showErrorMessage(String message);
-        void openMainView(User user);
-
-        void startingLoading();
-        void endingLoading();
-        void addItems(List<Status> statuses);
-    }
-
-    public StoryPresenter(View view, User user){
+    public StoryPresenter(PagedView<Status> view, User user){
         this.view = view;
         this.user = user;
     }
@@ -63,7 +49,7 @@ public class StoryPresenter implements UserService.GetUserObserver, StatusServic
     }
 
     @Override
-    public void getUserFailed(String message) {
+    public void handleFailure(String message) {
         view.showErrorMessage(message);
     }
 
@@ -82,16 +68,6 @@ public class StoryPresenter implements UserService.GetUserObserver, StatusServic
         view.endingLoading();
         view.showErrorMessage(message);
     }
-
-    public boolean getIsLoading() {
-        return isLoading;
-    }
-
-    public boolean getHasMorePages() {
-        return hasMorePages;
-    }
-
-
 
 
 

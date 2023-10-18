@@ -1,7 +1,6 @@
 package edu.byu.cs.tweeter.client.model.service.backgroundTask.handler;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
@@ -9,6 +8,7 @@ import java.util.List;
 
 //import edu.byu.cs.tweeter.client.model.service.*;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowersTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFollowingTask;
 import edu.byu.cs.tweeter.model.domain.User;
 
@@ -27,10 +27,9 @@ public class GetFollowingHandler extends HandlerGeneral {
 
     @Override
     protected void handleSuccess(Message msg) {
-        Bundle bundle = msg.getData();
-        List<User> followees = (List<User>) bundle.getSerializable(GetFollowingTask.ITEMS_KEY);
-        boolean hasMorePages = bundle.getBoolean(GetFollowingTask.MORE_PAGES_KEY);
-        observer.handleSuccess(followees, hasMorePages);
+        List<User> followees = (List<User>) msg.getData().getSerializable(GetFollowingTask.ITEMS_KEY);
+        boolean hasMorePages = msg.getData().getBoolean(GetFollowingTask.MORE_PAGES_KEY);
+        observer.getFollowingSuccess(followees, hasMorePages);
     }
 
     @Override

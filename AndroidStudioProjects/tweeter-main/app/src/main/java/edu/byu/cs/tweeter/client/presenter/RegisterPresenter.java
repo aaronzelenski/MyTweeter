@@ -13,7 +13,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class RegisterPresenter implements UserService.RegisterObserver{
 
-    View view;
+    private final View view;
 
     public interface View {
         void showErrorMessage(String message);
@@ -28,38 +28,22 @@ public class RegisterPresenter implements UserService.RegisterObserver{
         this.view = view;
     }
 
-    public boolean validateRegistration(String firstName, String lastName, String alias, String password, Drawable image){
-        if (firstName.length() == 0) {
-            view.showErrorMessage("First Name cannot be empty.");
+    public boolean validateRegistration(String firstName, String lastName, String alias, String password, Drawable image) {
+        if (firstName.isEmpty() || lastName.isEmpty() || alias.isEmpty() || password.isEmpty()) {
+            view.showErrorMessage("Please fill out all fields.");
             return false;
         }
-        if (lastName.length() == 0) {
-            view.showErrorMessage("Last Name cannot be empty.");
+        if (!alias.startsWith("@") || alias.length() < 2) {
+            view.showErrorMessage("Invalid Alias format.");
             return false;
         }
-        if (alias.length() == 0) {
-            view.showErrorMessage("Alias cannot be empty.");
-            return false;
-        }
-        if (alias.charAt(0) != '@') {
-            view.showErrorMessage("Alias must begin with @.");
-            return false;
-        }
-        if (alias.length() < 2) {
-            view.showErrorMessage("Alias must contain 1 or more characters after the @.");
-            return false;
-        }
-        if (password.length() == 0) {
-            view.showErrorMessage("Password cannot be empty.");
-            return false;
-        }
-
         if (image == null) {
             view.showErrorMessage("Profile image must be uploaded.");
             return false;
         }
         return true;
     }
+
 
 
     public void register(String firstName, String lastName, String alias, String password, Drawable image){

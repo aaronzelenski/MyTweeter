@@ -1,0 +1,1 @@
+Classes that are really similar for Paging View Controllers:- FeedPresenter (done)- StoryPresenter(done)- FollowerPresenter(done)- FollowingPresenter(done)Other classes for presenters:- RegisterPresenter- LoginPresenter- MainPresenterTasks:1. create a new presenter.java class2. check for similiarities with other presenter

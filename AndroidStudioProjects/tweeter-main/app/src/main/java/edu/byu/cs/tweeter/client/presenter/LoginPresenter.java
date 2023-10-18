@@ -57,10 +57,8 @@ public class LoginPresenter implements UserService.LoginObserver {
      */
     @Override
     public void handleSuccess(User user, AuthToken authToken) {
-        // Cache user session information
         Cache.getInstance().setCurrUser(user);
         Cache.getInstance().setCurrUserAuthToken(authToken);
-
         view.loginSuccessful(user, authToken);
     }
 

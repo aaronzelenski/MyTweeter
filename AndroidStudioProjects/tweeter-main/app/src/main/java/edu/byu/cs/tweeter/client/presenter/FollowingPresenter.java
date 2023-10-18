@@ -7,45 +7,25 @@ import java.util.List;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 
 /**
  * The presenter for the "following" functionality of the application.
  */
-public class FollowingPresenter implements FollowService.GetFollowingObserver, UserService.GetUserObserver {
+public class FollowingPresenter extends PagedPresenter<User> implements FollowService.GetFollowingObserver, UserService.GetUserObserver {
 
     private static final String LOG_TAG = "FollowingPresenter";
-    public static final int PAGE_SIZE = 10;
-
-    private final View view;
+    private final PagedView<User> view;
     private final User user;
     private final AuthToken authToken;
-
     private User lastFollowee;
-    private boolean hasMorePages = true;
-    private boolean isLoading = false;
 
     @Override
     public void getUserSucceeded(User user) {
         view.openMainView(user);
     }
 
-    @Override
-    public void getUserFailed(String message) {
-        view.showErrorMessage(message);
-    }
-
-    /**
-     * The interface by which this presenter communicates with it's view.
-     */
-    public interface View {
-        void setLoading(boolean value);
-        void addItems(List<User> newUsers);
-        void displayErrorMessage(String message);
-        void showInfoMessage(String s);
-        void showErrorMessage(String message);
-        void openMainView(User user);
-    }
 
     /**
      * Creates an instance.
@@ -54,7 +34,7 @@ public class FollowingPresenter implements FollowService.GetFollowingObserver, U
      * @param user      the user that is currently logged in.
      * @param authToken the auth token for the current session.
      */
-    public FollowingPresenter(View view, User user, AuthToken authToken) {
+    public FollowingPresenter(PagedView<User> view, User user, AuthToken authToken) {
         this.view = view;
         this.user = user;
         this.authToken = authToken;
@@ -68,16 +48,9 @@ public class FollowingPresenter implements FollowService.GetFollowingObserver, U
         this.lastFollowee = lastFollowee;
     }
 
-    public boolean isHasMorePages() {
-        return hasMorePages;
-    }
 
     private void setHasMorePages(boolean hasMorePages) {
         this.hasMorePages = hasMorePages;
-    }
-
-    public boolean isLoading() {
-        return isLoading;
     }
 
     private void setLoading(boolean loading) {
@@ -88,11 +61,12 @@ public class FollowingPresenter implements FollowService.GetFollowingObserver, U
      * Called by the view to request that another page of "following" users be loaded.
      */
     public void loadMoreItems() {
-        if (!isLoading && hasMorePages) {
+        if (!isLoading) {
             setLoading(true);
             view.setLoading(true);
 
-            getFollowing(authToken, user, PAGE_SIZE, lastFollowee);
+            var getFollowingService = new FollowService();
+            getFollowingService.getFollowees(authToken, user, PAGE_SIZE, lastFollowee, this);
         }
     }
 
@@ -129,7 +103,7 @@ public class FollowingPresenter implements FollowService.GetFollowingObserver, U
      * @param hasMorePages whether or not there are more followees to be retrieved.
      */
     @Override
-    public void handleSuccess(List<User> followees, boolean hasMorePages) {
+    public void getFollowingSuccess(List<User> followees, boolean hasMorePages) {
         setLastFollowee((followees.size() > 0) ? followees.get(followees.size() - 1) : null);
         setHasMorePages(hasMorePages);
 
@@ -149,7 +123,7 @@ public class FollowingPresenter implements FollowService.GetFollowingObserver, U
         Log.e(LOG_TAG, errorMessage);
 
         view.setLoading(false);
-        view.displayErrorMessage(errorMessage);
+        view.showErrorMessage(errorMessage);
         setLoading(false);
     }
 
@@ -165,7 +139,7 @@ public class FollowingPresenter implements FollowService.GetFollowingObserver, U
         Log.e(LOG_TAG, errorMessage, exception);
 
         view.setLoading(false);
-        view.displayErrorMessage(errorMessage);
+        view.showErrorMessage(errorMessage);
         setLoading(false);
     }
 
@@ -177,4 +151,15 @@ public class FollowingPresenter implements FollowService.GetFollowingObserver, U
         view.showInfoMessage("Getting user's profile...");
 
     }
+
+//
+//    public boolean getIsLoading() {
+//        return isLoading;
+//    }
+//
+//    public boolean getHasMorePages() {
+//        return hasMorePages;
+//    }
+
+
 }

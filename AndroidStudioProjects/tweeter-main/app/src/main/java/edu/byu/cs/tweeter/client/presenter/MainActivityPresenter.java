@@ -9,8 +9,8 @@ import edu.byu.cs.tweeter.model.domain.User;
 public class MainActivityPresenter implements StatusService.GetMainActivityObserver, StatusService.PostStatusObserver,
 StatusService.LogoutObserver, StatusService.followerCountObserver, StatusService.followingCountObserver, StatusService.isFollowerObserver{
 
-    private View view;
-    private User user;
+    private final View view;
+    private final User user;
 
     public interface View{
         void showFollowInfoMessage(String message);
@@ -50,8 +50,32 @@ StatusService.LogoutObserver, StatusService.followerCountObserver, StatusService
         view.showUnfollowInfoMessage("Removing " + selectedUser.getName() + "...");
     }
 
-    public void postStatus(String post, User user, long currentTimeMillis, List<String> parseURLs, List<String> parseMentions){
+    public void logout(AuthToken authToken){
+        var statusService = new StatusService();
+        statusService.logoutTask(authToken, this);
+        view.showLogoutInfoMessage("Logging Out...");
+    }
 
+
+
+    public void getFollowersCount(AuthToken authToken, User selectedUser){
+        var statusService = new StatusService();
+        statusService.getFollowersCountTask(authToken, selectedUser, this);
+    }
+
+
+    public void getFollowingCount(AuthToken authToken, User selectedUser){
+        var statusService = new StatusService();
+        statusService.getFollowingCountTask(authToken, selectedUser, this);
+    }
+
+
+    public void isFollower(AuthToken authToken, User currUser, User selectedUser){
+        var statusService = new StatusService();
+        statusService.isFollowerTask(authToken, currUser,selectedUser,this);
+    }
+
+    public void postStatus(String post, User user, long currentTimeMillis, List<String> parseURLs, List<String> parseMentions){
         var statusService = new StatusService();
         statusService.postTask(post, user, currentTimeMillis, parseURLs(post), parseMentions(post), this);
         try{
@@ -113,53 +137,7 @@ StatusService.LogoutObserver, StatusService.followerCountObserver, StatusService
         }
     }
 
-    public void logout(AuthToken authToken){
-        var statusService = new StatusService();
-        statusService.logoutTask(authToken, this);
-        view.showLogoutInfoMessage("Logging Out...");
-    }
 
-
-
-    public void getFollowersCount(AuthToken authToken, User selectedUser){
-        var statusService = new StatusService();
-        statusService.getFollowersCountTask(authToken, selectedUser, this);
-    }
-
-
-    public void getFollowingCount(AuthToken authToken, User selectedUser){
-        var statusService = new StatusService();
-        statusService.getFollowingCountTask(authToken, selectedUser, this);
-    }
-
-
-    public void isFollower(AuthToken authToken, User currUser, User selectedUser){
-        var statusService = new StatusService();
-        statusService.isFollowerTask(authToken, currUser,selectedUser,this);
-    }
-
-
-
-    @Override
-    public void isFollowerSucceeded(Message msg) {
-        view.isFollowerSucceeded(msg);
-    }
-
-    @Override
-    public void isFollowerFailed(String message) {
-        view.isFollowerFailed(message);
-    }
-
-
-    @Override
-    public void postStatusSucceeded(String message) {
-        view.postShowSuccessMessage(message);
-    }
-
-    @Override
-    public void postStatusFailed(String message) {
-        view.postShowErrorMessage(message);
-    }
 
     @Override
     public void followTaskSucceeded(boolean isFollowing) {
@@ -167,13 +145,30 @@ StatusService.LogoutObserver, StatusService.followerCountObserver, StatusService
         view.updateFollowingAndFollowersCountView();
     }
     @Override
-    public void followTaskFailed(String message) {
-        view.showErrorMessage(message);
-    }
-    @Override
     public void unfollowTaskSucceeded(boolean isFollowing) {
         view.updateFollowButtonView(isFollowing);
         view.updateFollowingAndFollowersCountView();
+    }
+
+    @Override
+    public void isFollowerSucceeded(Message msg) {
+        view.isFollowerSucceeded(msg);
+    }
+    @Override
+    public void isFollowerFailed(String message) {
+        view.isFollowerFailed(message);
+    }
+    @Override
+    public void postStatusSucceeded(String message) {
+        view.postShowSuccessMessage(message);
+    }
+    @Override
+    public void postStatusFailed(String message) {
+        view.postShowErrorMessage(message);
+    }
+    @Override
+    public void followTaskFailed(String message) {
+        view.showErrorMessage(message);
     }
     @Override
     public void unfollowTaskFailed(String message) {

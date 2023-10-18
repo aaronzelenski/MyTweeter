@@ -27,13 +27,14 @@ import java.util.List;
 import edu.byu.cs.tweeter.R;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.presenter.FollowerPresenter;
+import edu.byu.cs.tweeter.client.presenter.PagedPresenter;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.User;
 
 /**
  * Implements the "Followers" tab.
  */
-public class FollowersFragment extends Fragment implements FollowerPresenter.View{
+public class FollowersFragment extends Fragment implements PagedPresenter.PagedView<User> {
 
     private static final String LOG_TAG = "FollowersFragment";
     private static final String USER_KEY = "UserKey";
@@ -46,7 +47,7 @@ public class FollowersFragment extends Fragment implements FollowerPresenter.Vie
 
     private User user;
 
-    private FollowersRecyclerViewAdapter followersRecyclerViewAdapter;
+    public FollowersRecyclerViewAdapter followersRecyclerViewAdapter;
 
     private FollowerPresenter presenter;
 
@@ -59,10 +60,8 @@ public class FollowersFragment extends Fragment implements FollowerPresenter.Vie
      */
     public static FollowersFragment newInstance(User user) {
         FollowersFragment fragment = new FollowersFragment();
-
         Bundle args = new Bundle(1);
         args.putSerializable(USER_KEY, user);
-
         fragment.setArguments(args);
         return fragment;
     }
@@ -90,6 +89,17 @@ public class FollowersFragment extends Fragment implements FollowerPresenter.Vie
 
         return view;
     }
+
+    @Override
+    public void setLoading(boolean value) {
+
+    }
+
+    @Override
+    public void addItems(List<User> newItems) {
+        followersRecyclerViewAdapter.addItems(newItems);
+    }
+
 
     @Override
     public void showInfoMessage(String message) {
@@ -120,9 +130,10 @@ public class FollowersFragment extends Fragment implements FollowerPresenter.Vie
     }
 
     @Override
-    public void addItems(List<User> followers) {
-        followersRecyclerViewAdapter.addItems(followers);
+    public void hideInfoMessage() {
+
     }
+
 
     /**
      * The ViewHolder for the RecyclerView that displays the follower data.

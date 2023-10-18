@@ -33,6 +33,7 @@ import java.util.List;
 import edu.byu.cs.tweeter.R;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.presenter.FeedPresenter;
+import edu.byu.cs.tweeter.client.presenter.PagedPresenter;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -41,7 +42,7 @@ import edu.byu.cs.tweeter.util.Timestamp;
 /**
  * Implements the "Feed" tab.
  */
-public class FeedFragment extends Fragment implements FeedPresenter.View{
+public class FeedFragment extends Fragment implements PagedPresenter.PagedView<Status>{
     private static final String LOG_TAG = "FeedFragment";
     private static final String USER_KEY = "UserKey";
 
@@ -198,7 +199,6 @@ public class FeedFragment extends Fragment implements FeedPresenter.View{
 
         private final List<Status> feed = new ArrayList<>();
 
-
         /**
          * Creates an instance and loads the first page of feed data.
          */
@@ -261,7 +261,6 @@ public class FeedFragment extends Fragment implements FeedPresenter.View{
             } else {
                 view = layoutInflater.inflate(R.layout.status_row, parent, false);
             }
-
             return new FeedHolder(view);
         }
 
@@ -385,18 +384,13 @@ public class FeedFragment extends Fragment implements FeedPresenter.View{
     }
 
     @Override
-    public void hideErrorMessage() {
-
-    }
-
-    @Override
     public void showInfoMessage(String message) {
         Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void hideInfoMessage() {
-
+        Toast.makeText(getContext(), "", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -414,6 +408,11 @@ public class FeedFragment extends Fragment implements FeedPresenter.View{
     @Override
     public void endingLoading() {
         feedRecyclerViewAdapter.removeLoadingFooter();
+    }
+
+    @Override
+    public void setLoading(boolean value) {
+        //presenter.isLoading = value; // maybe this is not needed
     }
 
     @Override

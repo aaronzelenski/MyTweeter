@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,7 @@ import java.util.List;
 import edu.byu.cs.tweeter.R;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.presenter.FollowingPresenter;
+import edu.byu.cs.tweeter.client.presenter.PagedPresenter;
 import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -33,16 +35,15 @@ import edu.byu.cs.tweeter.model.domain.User;
 /**
  * The fragment that displays on the 'Following' tab.
  */
-public class FollowingFragment extends Fragment implements FollowingPresenter.View {
+public class FollowingFragment extends Fragment implements PagedPresenter.PagedView<User> {
 
     private static final String LOG_TAG = "FollowingFragment";
     private static final String USER_KEY = "UserKey";
-
     private static final int LOADING_DATA_VIEW = 0;
     private static final int ITEM_VIEW = 1;
-
-    private String clickable;
     private FollowingPresenter presenter;
+
+    private User user;
 
     private FollowingRecyclerViewAdapter followingRecyclerViewAdapter;
 
@@ -55,10 +56,8 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
      */
     public static FollowingFragment newInstance(User user) {
         FollowingFragment fragment = new FollowingFragment();
-
         Bundle args = new Bundle(1);
         args.putSerializable(USER_KEY, user);
-
         fragment.setArguments(args);
         return fragment;
     }
@@ -72,7 +71,12 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
      */
     @Override
     public void setLoading(boolean value) {
-        followingRecyclerViewAdapter.setLoading(value);
+        //followingRecyclerViewAdapter.setLoading(value);
+    }
+
+    @Override
+    public void addItems(List<User> followers) {
+        followingRecyclerViewAdapter.addItems(followers);
     }
 
     /**
@@ -80,20 +84,13 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
      *
      * @param newUsers list of new "following" users.
      */
-    @Override
-    public void addItems(List<User> newUsers) {
-        followingRecyclerViewAdapter.addItems(newUsers);
-    }
 
     /**
      * Directs the view to display the specified error message to the user.
      *
      * @param message error message to be displayed.
      */
-    @Override
-    public void displayErrorMessage(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-    }
+
 
     @Override
     public void showInfoMessage(String message) {
@@ -111,6 +108,21 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
         Intent intent = new Intent(getContext(), MainActivity.class);
         intent.putExtra(MainActivity.CURRENT_USER_KEY, user);
         startActivity(intent);
+    }
+
+    @Override
+    public void startingLoading() {
+        followingRecyclerViewAdapter.addLoadingFooter();
+
+    }
+
+    @Override
+    public void endingLoading() {
+        followingRecyclerViewAdapter.removeLoadingFooter();
+    }
+
+    @Override
+    public void hideInfoMessage() {
 
     }
 
@@ -119,7 +131,8 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_following, container, false);
 
-        User user = (User) getArguments().getSerializable(USER_KEY);
+        assert getArguments() != null;
+        user = (User) getArguments().getSerializable(USER_KEY);
 
         AuthToken authToken = Cache.getInstance().getCurrUserAuthToken();
 
@@ -164,17 +177,10 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-//                        Toast.makeText(getContext(), "You selected '" + userName.getText() + "'. NOTE: THIS SAMPLE CODE IS A SUBSET OF THE PROJECT FUNCTIONALITY SO THERE'S NOWHERE FOR THIS CLICK TO GO. YOU WILL NEED TO NAVIGATE TO THE CLICKED USER IN YOUR PROJECT.", Toast.LENGTH_SHORT).show();
-                        //assert userAlias != null;
                         presenter.getUser(Cache.getInstance().getCurrUserAuthToken(),
                                 userAlias.getText().toString());
                     }
                 });
-//             else {
-//                userImage = null;
-//                userAlias = null;
-//                userName = null;
-//            }
         }
 
         /**
@@ -183,7 +189,9 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
          * @param user the user.
          */
         void bindUser(User user) {
-            Picasso.get().load(user.getImageUrl()).into(userImage);
+            if (user == null)
+                Log.e(LOG_TAG, "user is null!");
+            assert user != null;
             userAlias.setText(user.getAlias());
             userName.setText(user.getName());
 
@@ -204,14 +212,7 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
          *
          * @param value true if we are loading, false otherwise.
          */
-        void setLoading(boolean value) {
-            if (value) {
-                addLoadingFooter();
-            }
-            else {
-                removeLoadingFooter();
-            }
-        }
+        //void setLoading(boolean value) {
 
         /**
          * Adds new users to the list from which the RecyclerView retrieves the users it displays
@@ -282,7 +283,7 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
          */
         @Override
         public void onBindViewHolder(@NonNull FollowingHolder followingHolder, int position) {
-            if(!presenter.isLoading()) {
+            if(!presenter.getIsLoading()) {
                 followingHolder.bindUser(users.get(position));
             }
         }
@@ -305,7 +306,7 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
          */
         @Override
         public int getItemViewType(int position) {
-            return (position == users.size() - 1 && presenter.isLoading()) ? LOADING_DATA_VIEW : ITEM_VIEW;
+            return (position == users.size() - 1 && presenter.getIsLoading()) ? LOADING_DATA_VIEW : ITEM_VIEW;
         }
 
         /**
@@ -359,7 +360,7 @@ public class FollowingFragment extends Fragment implements FollowingPresenter.Vi
             int totalItemCount = layoutManager.getItemCount();
             int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
-            if (!presenter.isLoading() && presenter.isHasMorePages()) {
+            if (!presenter.getIsLoading() && presenter.getHasMorePages()) {
                 if ((visibleItemCount + firstVisibleItemPosition) >=
                         totalItemCount && firstVisibleItemPosition >= 0) {
                     // Run this code later on the UI thread

@@ -1,37 +1,19 @@
 package edu.byu.cs.tweeter.client.presenter;
-
 import java.util.List;
-
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
+public class FeedPresenter extends PagedPresenter<Status> implements StatusService.getFeedObserver, UserService.GetUserObserver {
 
-// minute 47:49
-public class FeedPresenter implements StatusService.getFeedObserver, UserService.GetUserObserver{
-
-    View view;
-    User user;
-    private static final int PAGE_SIZE = 10; // tells the service how many statuses request the server for
+    private final PagedView<Status> view;
+    private final User user;
     private Status lastStatus;
-    private boolean hasMorePages;
-    private boolean isLoading = false;
 
 
-    public interface View { // view interface
-        void showErrorMessage(String message);
-        void hideErrorMessage();
-        void showInfoMessage(String message);
-        void hideInfoMessage();
-        void openMainView(User user);
-        void startingLoading();
-        void endingLoading();
-        void addItems(List<Status> statuses);
-    }
-
-    public FeedPresenter(View view, User user) { // constructor
+    public FeedPresenter(PagedView<Status> view, User user) {// constructor
         this.view = view;
         this.user = user;
     }
@@ -83,20 +65,9 @@ public class FeedPresenter implements StatusService.getFeedObserver, UserService
     }
 
     @Override
-    public void getUserFailed(String message) {
+    public void handleFailure(String message) {
         view.showErrorMessage(message);
 
     }
-
-
-    public boolean getIsLoading() {
-        return isLoading;
-    }
-
-    public boolean getHasMorePages() {
-        return hasMorePages;
-    }
-
-
 
 }

@@ -22,11 +22,11 @@ public class GetUserHandler extends HandlerGeneral {
 
     @Override
     protected void handleFailure(String message) {
-        observer.getUserFailed(message);
+        observer.handleFailure(message);
     }
 
     @Override
     protected void handleException(Exception ex) {
-        observer.getUserFailed("Failed to get user's profile because of exception: " + ex.getMessage());
+        observer.handleFailure("Failed to get user's profile because of exception: " + ex.getMessage());
     }
 }
