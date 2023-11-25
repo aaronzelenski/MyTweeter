@@ -1,0 +1,25 @@
+aws lambda update-function-code --function-name login --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
+aws lambda update-function-code --function-name getStory --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
+aws lambda update-function-code --function-name register --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
+aws lambda update-function-code --function-name getFollower --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
+aws lambda update-function-code --function-name toFollow --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
+aws lambda update-function-code --function-name getFollowing --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
+aws lambda update-function-code --function-name logout --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
+aws lambda update-function-code --function-name getFeed --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
+aws lambda update-function-code --function-name toUnfollow --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
+aws lambda update-function-code --function-name isFollower --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
+aws lambda update-function-code --function-name getUser --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
+aws lambda update-function-code --function-name getFollowersCount --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
+aws lambda update-function-code --function-name getFollowingCount --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
+aws lambda update-function-code --function-name postStatus --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
+
+
+or
+
+
+./update-lambda.sh  (for all the lambdas)
+
+
+
+
+
