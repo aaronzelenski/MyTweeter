@@ -41,7 +41,7 @@ public class UserDAO implements IUserDAO {
     private static final String TableName = "users";
     private static final String BUCKET_NAME = "tweeterprofileimagebucket";
     private static AmazonS3 s3Client = null;
-    private final DynamoDbTable<User> userTable;
+    public final DynamoDbTable<User> userTable;
     private static final Logger logger = Logger.getLogger(RegisterHandler.class.getName());
 
 
@@ -57,7 +57,6 @@ public class UserDAO implements IUserDAO {
         this.userTable = enhancedClient.table(TableName, TableSchema.fromBean(User.class));
         initializeS3Client();
     }
-
     private static void initializeS3Client() {
         if (s3Client == null) {
             s3Client = AmazonS3ClientBuilder.standard()
@@ -69,21 +68,25 @@ public class UserDAO implements IUserDAO {
     @Override
     public RegisterResponse registerUser(RegisterRequest request) {
 
-        Key key = Key.builder()
-                .partitionValue(request.getUsername())
-                .build();
-        User existingUser = userTable.getItem(r -> r.key(key));
+        try {
+            Key key = Key.builder()
+                    .partitionValue(request.getUsername())
+                    .build();
+            User existingUser = userTable.getItem(r -> r.key(key));
 
-        if (existingUser != null) {
-            throw new RuntimeException("[Bad Request] User already exists");
+            if (existingUser != null) {
+                throw new RuntimeException("[Bad Request] User already exists");
+            }
+
+            String imageUrl = request.getImageUrl();
+
+            User user = new User(request.getFirstName(), request.getLastName(), request.getUsername(), imageUrl, hashPassword(request.getPassword()));
+            userTable.putItem(user);
+
+            return new RegisterResponse(user, new AuthToken());
+        } catch (RuntimeException e) {
+            throw new RuntimeException("[Bad Request] " + e.getMessage());
         }
-
-        String imageUrl = request.getImageUrl();
-
-        User user = new User(request.getFirstName(), request.getLastName(), request.getUsername(), imageUrl, hashPassword(request.getPassword()));
-        userTable.putItem(user);
-
-        return new RegisterResponse(user, new AuthToken());
     }
 
     @Override
@@ -101,7 +104,6 @@ public class UserDAO implements IUserDAO {
         if (!hashedPassword.equals(user.getPassword())) {
             throw new RuntimeException("[Bad Request] Invalid password");
         }
-
 
 
         return new LoginResponse(user, new AuthToken());
@@ -136,14 +138,16 @@ public class UserDAO implements IUserDAO {
 
     @Override
     public GetUserResponse getUser(GetUserRequest request) {
+
         Key key = Key.builder()
-                .partitionValue(request.getUser().getAlias())
+                .partitionValue(request.getAlias())
                 .build();
 
         User user = userTable.getItem(r -> r.key(key));
         if (user == null) {
             throw new RuntimeException("[Bad Request] User not found");
         }
+        logger.info(new GetUserResponse(user) + " is the response ( this is inside my UserDAO::getUser)");
         return new GetUserResponse(user);
     }
 

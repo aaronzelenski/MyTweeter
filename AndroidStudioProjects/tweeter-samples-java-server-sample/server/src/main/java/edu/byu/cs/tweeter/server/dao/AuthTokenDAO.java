@@ -1,5 +1,6 @@
 package edu.byu.cs.tweeter.server.dao;
 
+import java.sql.Timestamp;
 import java.util.Iterator;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
@@ -59,7 +60,17 @@ public class AuthTokenDAO implements IAuthTokenDAO {
                 .partitionValue(token)
                 .build();
 
-        return authTokenTable.getItem(key);
+        AuthToken authToken = authTokenTable.getItem(key);
+
+        if (authToken != null) {
+            long tokenTimestamp = authToken.getTimestamp();
+            long currentTime = System.currentTimeMillis();
+
+            if (currentTime - tokenTimestamp < 3600000) { // 3600000 milliseconds in an hour
+                return authToken;
+            }
+        }
+        return null;
     }
 
 

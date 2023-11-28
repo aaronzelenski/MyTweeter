@@ -57,6 +57,7 @@ public class RegisterTask extends BackgroundTask{
                 sendSuccessMessage();
             } else {
                 sendFailedMessage(response.getMessage());
+
             }
         } catch (Exception ex) {
             Log.e(LOG_TAG, ex.getMessage(), ex);

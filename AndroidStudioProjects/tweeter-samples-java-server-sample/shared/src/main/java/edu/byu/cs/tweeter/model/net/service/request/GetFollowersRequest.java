@@ -7,7 +7,7 @@ public class GetFollowersRequest {
     public GetFollowersRequest() {}
 
     private AuthToken authToken;
-    private String followerAlias;
+    private String followeeAlias;
     private int limit;
     private String lastFollowerAlias;
 
@@ -15,15 +15,15 @@ public class GetFollowersRequest {
     /**
      * Creates an instance.
      *
-     * @param followerAlias the alias of the user whose followees are to be returned.
+     * @param followeeAlias the alias of the user whose followees are to be returned.
      * @param limit the maximum number of followees to return.
      * @param lastFollowerAlias the alias of the last followee that was returned in the previous request (null if
      *                     there was no previous request or if no followees were returned in the
      *                     previous request).
      */
-    public GetFollowersRequest(AuthToken authToken, String followerAlias, int limit, String lastFollowerAlias) {
+    public GetFollowersRequest(AuthToken authToken, String followeeAlias, int limit, String lastFollowerAlias) {
         this.authToken = authToken;
-        this.followerAlias = followerAlias;
+        this.followeeAlias = followeeAlias;
         this.limit = limit;
         this.lastFollowerAlias = lastFollowerAlias;
     }
@@ -36,12 +36,12 @@ public class GetFollowersRequest {
         this.authToken = authToken;
     }
 
-    public String getFollowerAlias() {
-        return followerAlias;
+    public String getFolloweeAlias() {
+        return followeeAlias;
     }
 
-    public void setFollowerAlias(String followerAlias) {
-        this.followerAlias = followerAlias;
+    public void setFolloweeAlias(String followeeAlias) {
+        this.followeeAlias = followeeAlias;
     }
 
     public int getLimit() {

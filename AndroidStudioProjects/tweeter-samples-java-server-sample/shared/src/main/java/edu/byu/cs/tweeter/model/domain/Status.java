@@ -1,36 +1,25 @@
 package edu.byu.cs.tweeter.model.domain;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
+
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
 
 /**
  * Represents a status (or tweet) posted by a user.
  */
+@DynamoDbBean
 public class Status implements Serializable {
-    /**
-     * Text for the status.
-     */
-    public String post;
-    /**
-     * User who sent the status.
-     */
-    public User user;
-    /**
-     * String representation of the date/time at which the status was sent.
-     */
-    public Long timestamp;
-    /**
-     * URLs contained in the post text.
-     */
-    public List<String> urls;
-    /**
-     * User mentions contained in the post text.
-     */
-    public List<String> mentions;
+
+    private String alias;
+    private String post;
+    private User user;
+    private Long timestamp;
+    private List<String> urls;
+    private List<String> mentions;
 
     public Status() {
     }
@@ -43,6 +32,15 @@ public class Status implements Serializable {
         this.mentions = mentions;
     }
 
+    @DynamoDbPartitionKey
+    public String getAlias() {
+        return this.alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -51,20 +49,37 @@ public class Status implements Serializable {
         return user;
     }
 
+    @DynamoDbSortKey
     public Long getTimestamp() {
         return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getPost() {
         return post;
     }
 
+    public void setPost(String post) {
+        this.post = post;
+    }
+
     public List<String> getUrls() {
         return urls;
     }
 
+    public void setUrls(List<String> urls) {
+        this.urls = urls;
+    }
+
     public List<String> getMentions() {
         return mentions;
+    }
+
+    public void setMentions(List<String> mentions) {
+        this.mentions = mentions;
     }
 
     @Override
@@ -94,5 +109,4 @@ public class Status implements Serializable {
                 ", urls=" + urls +
                 '}';
     }
-
 }

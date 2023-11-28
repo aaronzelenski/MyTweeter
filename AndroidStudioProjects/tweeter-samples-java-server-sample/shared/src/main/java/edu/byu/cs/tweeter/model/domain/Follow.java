@@ -4,8 +4,10 @@ package edu.byu.cs.tweeter.model.domain;
 import java.io.Serializable;
 import java.util.Objects;
 
+
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
 
@@ -58,12 +60,13 @@ public class Follow implements Serializable {
         this.follower_handle = follower_handle;
     }
 
+
     @DynamoDbSortKey
-    //@DynamoDbSecondarySortKey(indexNames = FollowDAO.IndexName)
     public String getFollowee_handle() {
         return followee_handle;
     }
 
+    @DynamoDbSecondaryPartitionKey(indexNames = "follows_index")
     public void setFollowee_handle(String followee_handle) {
         this.followee_handle = followee_handle;
     }

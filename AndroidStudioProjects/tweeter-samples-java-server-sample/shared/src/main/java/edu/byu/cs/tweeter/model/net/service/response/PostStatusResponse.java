@@ -12,6 +12,10 @@ public class PostStatusResponse extends Response{
         super(false, message);
     }
 
+    public PostStatusResponse() {
+        super(true, null);
+
+    }
 
     public PostStatusResponse(Status status) {
         super(true, null);

@@ -20,6 +20,8 @@ or
 ./update-lambda.sh  (for all the lambdas)
 
 
+2048
 
+10240
 
 

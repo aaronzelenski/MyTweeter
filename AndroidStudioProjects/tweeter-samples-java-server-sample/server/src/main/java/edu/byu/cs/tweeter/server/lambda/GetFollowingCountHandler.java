@@ -11,7 +11,14 @@ import edu.byu.cs.tweeter.server.service.FollowService;
 public class GetFollowingCountHandler implements RequestHandler<GetFollowingCountRequest, GetFollowingCountResponse> {
     @Override
     public GetFollowingCountResponse handleRequest(GetFollowingCountRequest request, Context context) {
-        FollowService service = new FollowService();
-        return service.getFollowingCount(request);
+
+        DynamoDBFactoryDAO dynamoDBFactoryDAO = new DynamoDBFactoryDAO();
+        FollowService service = new FollowService(dynamoDBFactoryDAO);
+
+        try{
+            return service.getFollowingCount(request);
+        } catch (Exception e){
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

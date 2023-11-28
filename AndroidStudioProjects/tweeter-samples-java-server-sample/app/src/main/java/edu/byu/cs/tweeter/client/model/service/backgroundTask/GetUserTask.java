@@ -11,7 +11,7 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.service.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.service.response.GetUserResponse;
-import edu.byu.cs.tweeter.util.FakeData;
+
 
 /**
  * Background task that returns the profile for a specified user.
@@ -39,11 +39,12 @@ public class GetUserTask extends BackgroundTask {
     protected void runTask() {
         try {
 
-            user = getUser();
-
-            GetUserRequest request = new GetUserRequest(user, authToken);
+            GetUserRequest request = new GetUserRequest(alias, authToken);
             GetUserResponse response = getServerFacade().getUser(request, UserService.GET_USER_URL_PATH);
 
+            this.alias = request.getAlias();
+            this.authToken = request.getAuthToken();
+            this.user = response.getUser();
             if(response.isSuccess()) {
                 sendSuccessMessage();
             }
@@ -72,11 +73,11 @@ public class GetUserTask extends BackgroundTask {
 
 
 
-    FakeData getFakeData() {
-        return FakeData.getInstance();
-    }
-
-    private User getUser() {
-        return getFakeData().findUserByAlias(alias);
-    }
+//    FakeData getFakeData() {
+//        return FakeData.getInstance();
+//    }
+//
+//    private User getUser() {
+//        return getFakeData().findUserByAlias(alias);
+//    }
 }

@@ -4,7 +4,7 @@ public interface IFactoryDAO {
 
     IUserDAO getUserDAO();
     IAuthTokenDAO getAuthTokenDAO();
-
     IFollowDAO getFollowDAO();
+    IStatusDAO getStatusDAO();
 
 }

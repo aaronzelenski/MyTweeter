@@ -3,6 +3,7 @@ package edu.byu.cs.tweeter.model.net.service.response;
 import java.util.List;
 import java.util.Objects;
 
+import edu.byu.cs.tweeter.model.domain.Follow;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.service.request.FollowingRequest;
 
@@ -33,6 +34,7 @@ public class FollowingResponse extends PagedResponse {
         super(true, hasMorePages);
         this.followees = followees;
     }
+
 
     /**
      * Returns the followees for the corresponding request.

@@ -26,7 +26,6 @@ import edu.byu.cs.tweeter.server.dao.IFactoryDAO;
 import edu.byu.cs.tweeter.server.dao.IFollowDAO;
 import edu.byu.cs.tweeter.server.dao.IUserDAO;
 import edu.byu.cs.tweeter.server.lambda.IsFollowerHandler;
-import edu.byu.cs.tweeter.server.lambda.RegisterHandler;
 import edu.byu.cs.tweeter.util.Pair;
 
 
@@ -48,12 +47,10 @@ public class FollowService {
     public FollowService() {}
 
 
-
-
     public FollowResponse follow(FollowRequest request) throws Exception {
         try {
 
-            GetUserRequest getUserRequest = new GetUserRequest(request.getFollower(), request.getAuthToken());
+            GetUserRequest getUserRequest = new GetUserRequest(request.getFollower().getAlias(), request.getAuthToken());
 
             User follower = request.getFollower();
             AuthToken authToken = authDAO.validateToken(request.getAuthToken().toString());
@@ -77,7 +74,7 @@ public class FollowService {
             throw new RuntimeException("[Bad Request] Request needs to have a followee");
         }
 
-        GetUserRequest getUserRequest = new GetUserRequest(request.getUnFollower(), request.getAuthToken());
+        GetUserRequest getUserRequest = new GetUserRequest(request.getUnFollower().getAlias(), request.getAuthToken());
 
         User unFollower = request.getUnFollower();
         AuthToken authToken = authDAO.validateToken(request.getAuthToken().toString());
@@ -101,7 +98,7 @@ public class FollowService {
             throw new RuntimeException("[Bad Request] Request needs to have a followee");
         }
 
-        GetUserRequest getUserRequest = new GetUserRequest(request.getFollower(), request.getAuthToken());
+        GetUserRequest getUserRequest = new GetUserRequest(request.getFollower().getAlias(), request.getAuthToken());
 
         User follower = request.getFollower();
         AuthToken authToken = authDAO.validateToken(request.getAuthToken().toString());
@@ -118,75 +115,65 @@ public class FollowService {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public FollowingResponse getFollowees(FollowingRequest request) {
-        if(request.getFollowerAlias() == null) {
-            throw new RuntimeException("[Bad Request] Request needs to have a follower alias");
-        } else if(request.getLimit() <= 0) {
-            throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
-        }
-
-        Pair<List<User>, Boolean> pair = getFollowingDAO().getFollowees(request.getFollowerAlias(), request.getLimit(), request.getLastFolloweeAlias());
-        return new FollowingResponse(pair.getFirst(), pair.getSecond());
-    }
-
-
-
-    public GetFollowersResponse getFollowers(GetFollowersRequest request){
-        	if(request.getFollowerAlias() == null) {
-                throw new RuntimeException("[Bad Request] Request needs to have a follower alias");
-            } else if(request.getLimit() <= 0) {
-                throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
-            }
-
-        	Pair<List<User>, Boolean> pair = getFollowingDAO().getFollowers(request.getFollowerAlias(), request.getLimit(), request.getLastFollowerAlias());
-            return new GetFollowersResponse(pair.getFirst(), pair.getSecond());
-    }
-
     public GetFollowersCountResponse getFollowersCount(GetFollowersCountRequest request){
         if(request.getUser() == null){
             throw new RuntimeException("[Bad Request] Request needs to have a user");
         }else if(request.getAuthToken() == null){
             throw new RuntimeException("[Bad Request] Request needs to have an auth token");
         }
-        int count = getFollowingDAO().getFollowerCount(request.getUser());
-        return new GetFollowersCountResponse(count);
+
+        AuthToken authToken = authDAO.validateToken(request.getAuthToken().toString());
+        GetUserRequest getUserRequest = new GetUserRequest(request.getAlias(), authToken);
+        User user = userDAO.getUser(getUserRequest).getUser();
+        request.setUser(user);
+        request.setAuthToken(authToken);
+
+        return followDAO.getFollowersCount(request);
     }
 
 
-    public GetFollowingCountResponse getFollowingCount(GetFollowingCountRequest request){
-        if(request.getUser() == null){
+    public GetFollowingCountResponse getFollowingCount(GetFollowingCountRequest request) {
+        // Validate the request
+        if (request.getUser() == null) {
             throw new RuntimeException("[Bad Request] Request needs to have a user");
-        }else if(request.getAuthToken() == null){
+        } else if (request.getAuthToken() == null) {
             throw new RuntimeException("[Bad Request] Request needs to have an auth token");
         }
-        int count = getFollowingDAO().getFolloweeCount(request.getUser());
-        return new GetFollowingCountResponse(count);
+
+        // Validate the AuthToken and ensure the user exists
+        AuthToken authToken = authDAO.validateToken(request.getAuthToken().toString());
+        GetUserRequest getUserRequest = new GetUserRequest(request.getUser().getAlias(), authToken);
+        User user = userDAO.getUser(getUserRequest).getUser();
+        request.setUser(user);
+
+        // Call the DAO method to get following count
+        return followDAO.getFollowingCount(request);
     }
 
+    public FollowingResponse getFollowing(FollowingRequest request) {
+        if(request.getFollowerAlias() == null) {
+            throw new RuntimeException("[Bad Request] Request needs to have a follower alias");
+        } else if(request.getLimit() <= 0) {
+            throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
+        }
 
+        AuthToken authToken = authDAO.validateToken(request.getAuthToken().toString());
+        request.setAuthToken(authToken);
 
-
-
-
-
-
-
-
-
-    FollowDAO getFollowingDAO() {
-        return new FollowDAO();
+        return followDAO.getFollowing(request);
     }
+
+    public GetFollowersResponse getFollowers(GetFollowersRequest request){
+        	if(request.getFolloweeAlias() == null) {
+                throw new RuntimeException("[Bad Request] Request needs to have a follower alias");
+            } else if(request.getLimit() <= 0) {
+                throw new RuntimeException("[Bad Request] Request needs to have a positive limit");
+            }
+
+        AuthToken authToken = authDAO.validateToken(request.getAuthToken().toString());
+        request.setAuthToken(authToken);
+
+        return followDAO.getFollowers(request);
+    }
+
 }

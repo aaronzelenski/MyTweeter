@@ -12,7 +12,15 @@ public class GetFollowersCountHandler implements RequestHandler<GetFollowersCoun
 
     @Override
     public GetFollowersCountResponse handleRequest(GetFollowersCountRequest request, Context context) {
-        FollowService service = new FollowService();
-        return service.getFollowersCount(request);
+
+        DynamoDBFactoryDAO dynamoDBFactoryDAO = new DynamoDBFactoryDAO();
+        FollowService service = new FollowService(dynamoDBFactoryDAO);
+
+        try {
+            return service.getFollowersCount(request);
+        } catch(Exception e){
+            throw new RuntimeException(e.getMessage());
+        }
+
     }
 }

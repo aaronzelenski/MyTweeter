@@ -16,7 +16,7 @@ import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.service.request.GetFollowersRequest;
 import edu.byu.cs.tweeter.model.net.service.response.GetFollowersResponse;
-import edu.byu.cs.tweeter.util.FakeData;
+
 import edu.byu.cs.tweeter.util.Pair;
 
 /**

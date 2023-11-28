@@ -5,24 +5,31 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class GetFollowersCountRequest {
 
-    private User user;
+    //private User user;
+
+    private String alias;
 
     private AuthToken authToken;
     public GetFollowersCountRequest() {}
 
-    public GetFollowersCountRequest(User user, AuthToken authToken) {
-        this.user = user;
+//    public GetFollowersCountRequest(User user, AuthToken authToken) {
+//        this.user = user;
+//        this.authToken = authToken;
+//    }
+
+    public GetFollowersCountRequest(String alias, AuthToken authToken) {
+        this.alias = alias;
         this.authToken = authToken;
     }
 
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
+//    public User getUser() {
+//        return user;
+//    }
+//
+//    public void setUser(User user) {
+//        this.user = user;
+//    }
 
     public AuthToken getAuthToken() {
         return authToken;
@@ -30,5 +37,13 @@ public class GetFollowersCountRequest {
 
     public void setAuthToken(AuthToken authToken) {
         this.authToken = authToken;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 }

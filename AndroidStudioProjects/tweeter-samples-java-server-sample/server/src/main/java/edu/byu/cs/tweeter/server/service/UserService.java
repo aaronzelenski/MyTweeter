@@ -26,7 +26,6 @@ import edu.byu.cs.tweeter.server.dao.IFactoryDAO;
 import edu.byu.cs.tweeter.server.dao.IFollowDAO;
 import edu.byu.cs.tweeter.server.dao.IUserDAO;
 import edu.byu.cs.tweeter.server.lambda.RegisterHandler;
-import edu.byu.cs.tweeter.util.FakeData;
 
 public class UserService {
 
@@ -69,6 +68,26 @@ public class UserService {
         return response;
     }
 
+    public void validateToken(String token) {
+        long diff = 3600000L;   // Tokens valid for one hour
+
+        if (token == null || token.isEmpty()) {
+            throw new RuntimeException("401");
+        }
+
+        String resp = String.valueOf(authDAO.validateToken(token));
+        if (resp == null || resp.isEmpty()) {
+            throw new RuntimeException("401");
+        }
+
+        long timestamp = Long.parseLong(resp);
+        long curr_time = new Timestamp(System.currentTimeMillis()).getTime();
+        if (curr_time - timestamp > diff) {
+            throw new RuntimeException("401");
+        }
+    }
+
+
 
     public LogoutResponse logout(LogoutRequest request) {
         return new LogoutResponse(true);
@@ -82,14 +101,11 @@ public class UserService {
         String hashedPassword = hashPassword(request.getPassword());
         request.setPassword(hashedPassword);
 
-        // check to see if there is an image
         if (request.getImageUrl() != null && !request.getImageUrl().isEmpty()) {
             String s3ImageUrl = userDAO.uploadImageToS3(request.getImageUrl(), request.getUsername());
             request.setImageUrl(s3ImageUrl);
         }
-
         RegisterResponse response = userDAO.registerUser(request);
-
 
         if (response.isSuccess()) {
             String token = UUID.randomUUID().toString();
@@ -103,23 +119,17 @@ public class UserService {
         return response;
     }
 
-
+// aws lambda update-function-code --function-name getUser --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
 
     public GetUserResponse getUser(GetUserRequest request) {
-        try {
+
+        logger.info("Getting user (inside my UserService::GetUser) " + request.getAlias());
+//        try {
             return userDAO.getUser(request);
-        } catch (Exception e) {
-            throw new RuntimeException("[Bad Request] Missing something");
-        }
-    }
-
-
-    public PostStatusResponse postStatus(PostStatusRequest request) {
-        if (request.getStatus() == null) {
-            throw new RuntimeException("[Bad Request] Missing a status");
-        }
-        Status status = getFakeData().getFakeStatuses().get(0);
-        return new PostStatusResponse(status);
+//        }
+//        catch (Exception e) {
+//            throw new RuntimeException("[Bad Request] User not found");
+//        }
     }
 
 
@@ -150,50 +160,4 @@ public class UserService {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * Returns the dummy user to be returned by the login operation.
-     * This is written as a separate method to allow mocking of the dummy user.
-     *
-     * @return a dummy user.
-     */
-    private User getDummyUser() {
-        return getFakeData().getFirstUser();
-    }
-
-    /**
-     * Returns the dummy auth token to be returned by the login operation.
-     * This is written as a separate method to allow mocking of the dummy auth token.
-     *
-     * @return a dummy auth token.
-     */
-    private AuthToken getDummyAuthToken() {
-        return getFakeData().getAuthToken();
-    }
-
-    /**
-     * Returns the {@link FakeData} object used to generate dummy users and auth tokens.
-     * This is written as a separate method to allow mocking of the {@link FakeData}.
-     *
-     * @return a {@link FakeData} instance.
-     */
-    private FakeData getFakeData() {
-        return FakeData.getInstance();
-    }
 }
