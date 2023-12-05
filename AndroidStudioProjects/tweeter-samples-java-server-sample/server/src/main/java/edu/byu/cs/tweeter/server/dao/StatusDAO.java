@@ -168,7 +168,7 @@ public class StatusDAO implements IStatusDAO {
     }
 
     private List<String> getFollowingUsers(String userAlias) {
-        // this shouldnt rely on the followDAO FIX!!!
+        // this shouldn't rely on the followDAO FIX!!!
         FollowDAO followDAO = new FollowDAO();
         List<String> followingUsers = new ArrayList<>();
         String lastFolloweeAlias = null;
