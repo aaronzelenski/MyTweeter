@@ -23,6 +23,11 @@ public class FollowTask extends AuthenticatedTask {
 
     private User follower;
 
+    private String followerAlias;
+
+    private String followeeAlias;
+
+
     private ServerFacade serverFacade;
 
     private FollowResponse response;
@@ -42,10 +47,15 @@ public class FollowTask extends AuthenticatedTask {
     @Override
     protected void runTask() {
         try {
-            FollowRequest request = new FollowRequest(follower, followee, authToken);
+
+            followerAlias = follower.getAlias();
+            followeeAlias = followee.getAlias();
+
+
+            FollowRequest request = new FollowRequest(followerAlias, followeeAlias, authToken);
             response = getServerFacade().follow(request, StatusService.TO_FOLLOW_URL);
-            this.followee = request.getFollowee();
-            this.follower = request.getFollower();
+//            this.followee = request.getFollowee();
+//            this.follower = request.getFollower();
             System.out.println("follower: " + follower);
             System.out.println("followee: " + followee);
             sendSuccessMessage();

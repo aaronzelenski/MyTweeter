@@ -26,6 +26,10 @@ public class UnfollowTask extends AuthenticatedTask{
 
     private User unFollower;
 
+    private String unFollowerAlias;
+
+    private String unFolloweeAlias;
+
     private ServerFacade serverFacade;
 
     private UnfollowResponse response;
@@ -42,9 +46,13 @@ public class UnfollowTask extends AuthenticatedTask{
     @Override
     protected void runTask() {
         try {
-            UnfollowRequest request = new UnfollowRequest(authToken, unFollower, unFollowee);
+
+            unFollowerAlias = unFollower.getAlias();
+            unFolloweeAlias = unFollowee.getAlias();
+
+            UnfollowRequest request = new UnfollowRequest(authToken, unFollowerAlias, unFolloweeAlias);
             response = getServerFacade().unfollow(request, FollowService.TO_UNFOLLOW_URL);
-            this.unFollowee = request.getUnFollowee();
+//            this.unFollowee = request.getUnFollowee();
             sendSuccessMessage();
 
         } catch (Exception ex) {

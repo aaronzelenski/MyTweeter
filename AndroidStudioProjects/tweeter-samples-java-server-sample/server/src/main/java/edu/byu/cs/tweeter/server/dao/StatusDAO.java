@@ -44,6 +44,7 @@ import software.amazon.awssdk.services.dynamodb.model.QueryResponse;
 
 public class StatusDAO implements IStatusDAO {
 
+    //https://developer.android.com/studio/releases#jdk-macro
 
     private static final String TableName = "status";
 
@@ -167,8 +168,7 @@ public class StatusDAO implements IStatusDAO {
     }
 
     private List<String> getFollowingUsers(String userAlias) {
-        // TODO: Implement fetching of following users from the appropriate DynamoDB table or index
-
+        // this shouldnt rely on the followDAO FIX!!!
         FollowDAO followDAO = new FollowDAO();
         List<String> followingUsers = new ArrayList<>();
         String lastFolloweeAlias = null;

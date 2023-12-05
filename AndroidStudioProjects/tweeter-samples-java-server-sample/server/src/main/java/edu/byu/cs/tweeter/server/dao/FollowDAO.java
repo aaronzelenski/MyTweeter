@@ -15,6 +15,7 @@ import edu.byu.cs.tweeter.model.net.service.request.FollowingRequest;
 import edu.byu.cs.tweeter.model.net.service.request.GetFollowersCountRequest;
 import edu.byu.cs.tweeter.model.net.service.request.GetFollowersRequest;
 import edu.byu.cs.tweeter.model.net.service.request.GetFollowingCountRequest;
+import edu.byu.cs.tweeter.model.net.service.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.service.request.IsFollowerRequest;
 import edu.byu.cs.tweeter.model.net.service.request.UnfollowRequest;
 import edu.byu.cs.tweeter.model.net.service.response.FollowResponse;
@@ -22,6 +23,7 @@ import edu.byu.cs.tweeter.model.net.service.response.FollowingResponse;
 import edu.byu.cs.tweeter.model.net.service.response.GetFollowersCountResponse;
 import edu.byu.cs.tweeter.model.net.service.response.GetFollowersResponse;
 import edu.byu.cs.tweeter.model.net.service.response.GetFollowingCountResponse;
+import edu.byu.cs.tweeter.model.net.service.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.service.response.IsFollowerResponse;
 import edu.byu.cs.tweeter.model.net.service.response.UnfollowResponse;
 import edu.byu.cs.tweeter.server.lambda.FollowHandler;
@@ -70,17 +72,26 @@ public class FollowDAO implements IFollowDAO {
     @Override
     public FollowResponse follow(FollowRequest request) {
 
+        UserDAO userDAO = new UserDAO();
         Follow follow = new Follow();
         try{
 
-        follow.setFollower(request.getFollower());
-        follow.setFollowee(request.getFollowee());
+            GetUserRequest getFollowerUserRequest = new GetUserRequest(request.getFollowerAlias(), request.getAuthToken());
+            GetUserResponse getUserFollowerResponse = userDAO.getUser(getFollowerUserRequest);
+            User follower = getUserFollowerResponse.getUser();
 
-        follow.setFollower_handle(request.getFollower().getAlias());
-        follow.setFollowee_handle(request.getFollowee().getAlias());
+            GetUserRequest getFolloweeUserRequest = new GetUserRequest(request.getFolloweeAlias(), request.getAuthToken());
+            GetUserResponse getUserFolloweeResponse = userDAO.getUser(getFolloweeUserRequest);
+            User followee = getUserFolloweeResponse.getUser();
 
-        follow.setFollowerName(request.getFollower().getFirstName());
-        follow.setFolloweeName(request.getFollowee().getFirstName());
+        follow.setFollower(follower);
+        follow.setFollowee(followee);
+
+        follow.setFollower_handle(request.getFollowerAlias());
+        follow.setFollowee_handle(request.getFolloweeAlias());
+
+        follow.setFollowerName(follower.getFirstName());
+        follow.setFolloweeName(followee.getFirstName());
 
         followDynamoDbTable.putItem(follow);
 
@@ -94,16 +105,27 @@ public class FollowDAO implements IFollowDAO {
     @Override
     public UnfollowResponse unfollow(UnfollowRequest request) {
         Follow follow = new Follow();
+        UserDAO userDAO = new UserDAO();
         try{
 
-            follow.setFollower(request.getUnFollower());
-            follow.setFollowee(request.getUnFollowee());
+            GetUserRequest getUnFollowerUserRequest = new GetUserRequest(request.getUnFollowerAlias(), request.getAuthToken());
+            GetUserResponse getUserUnFollowerResponse = userDAO.getUser(getUnFollowerUserRequest);
+            User unFollower = getUserUnFollowerResponse.getUser();
 
-            follow.setFollower_handle(request.getUnFollower().getAlias());
-            follow.setFollowee_handle(request.getUnFollowee().getAlias());
+            GetUserRequest getUnFolloweeUserRequest = new GetUserRequest(request.getUnFolloweeAlias(), request.getAuthToken());
+            GetUserResponse getUserUnFolloweeResponse = userDAO.getUser(getUnFolloweeUserRequest);
+            User unFollowee = getUserUnFolloweeResponse.getUser();
 
-            follow.setFollowerName(request.getUnFollower().getFirstName());
-            follow.setFolloweeName(request.getUnFollowee().getFirstName());
+
+
+            follow.setFollower(unFollower);
+            follow.setFollowee(unFollowee);
+
+            follow.setFollower_handle(request.getUnFollowerAlias());
+            follow.setFollowee_handle(request.getUnFolloweeAlias());
+
+            follow.setFollowerName(unFollower.getFirstName());
+            follow.setFolloweeName(unFollowee.getFirstName());
 
             followDynamoDbTable.deleteItem(follow);
 
@@ -147,33 +169,25 @@ public class FollowDAO implements IFollowDAO {
     @Override
     public GetFollowersCountResponse getFollowersCount(GetFollowersCountRequest request) {
         try {
-            // Access the global secondary index
             DynamoDbIndex<Follow> index = followDynamoDbTable.index("follows_index");
 
-            // Create a query conditional based on the followee's alias
             QueryConditional queryConditional = QueryConditional
                     .keyEqualTo(Key.builder()
-                            .partitionValue(request.getUser().getAlias())
+                            .partitionValue(request.getAlias())
                             .build());
 
-            // Build the query request
             QueryEnhancedRequest queryEnhancedRequest = QueryEnhancedRequest.builder()
                     .queryConditional(queryConditional)
                     .build();
 
-            // Perform the query on the index
             SdkIterable<Page<Follow>> pages = index.query(queryEnhancedRequest);
 
-            // Initialize the number of followers count
             int numOfFollowers = 0;
 
-            // Iterate over the pages and count the items
             for (Page<Follow> page : pages) {
-                // The count of followers is the number of items in the result set
                 numOfFollowers += page.items().size();
             }
 
-            // Return the count in the response
             return new GetFollowersCountResponse(numOfFollowers);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Failed to get followers count: " + e.getMessage(), e);
@@ -191,7 +205,7 @@ public class FollowDAO implements IFollowDAO {
 
             QueryConditional queryConditional = QueryConditional
                     .keyEqualTo(Key.builder()
-                            .partitionValue(request.getUser().getAlias())
+                            .partitionValue(request.getAlias())
                             .build());
 
             QueryEnhancedRequest queryEnhancedRequest = QueryEnhancedRequest.builder()

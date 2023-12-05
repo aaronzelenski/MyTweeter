@@ -83,15 +83,11 @@ public class StatusService {
 
     public GetFeedResponse getFeed(GetFeedRequest request) {
         if (request.getUser() == null || request.getUser().getAlias() == null) {
-            throw new IllegalArgumentException("[Bad Request] User information is required");
-        }
+            throw new IllegalArgumentException("[Bad Request] User information is required");}
         if (request.getLimit() <= 0) {
-            throw new IllegalArgumentException("[Bad Request] Limit must be positive");
-        }
+            throw new IllegalArgumentException("[Bad Request] Limit must be positive");}
         if (request.getAuthToken() == null) {
-            throw new IllegalArgumentException("[Bad Request] Authentication token is required");
-        }
-
+            throw new IllegalArgumentException("[Bad Request] Authentication token is required");}
 
         try {
             AuthToken authToken = authDAO.validateToken(request.getAuthToken().toString());

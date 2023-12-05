@@ -7,15 +7,21 @@ public class UnfollowRequest {
 
         private AuthToken authToken;
 
-        private User unFollower; // The user that is going to unfollow
-        private User unFollowee; // The user that is going to be unfollowed
-        public UnfollowRequest() {}
+//        private User unFollower;
+//        private User unFollowee;\
 
-        public UnfollowRequest(AuthToken authToken, User unFollower, User unFollowee) {
-            this.authToken = authToken;
-            this.unFollower = unFollower;
-            this.unFollowee = unFollowee;
+        private String unFollowerAlias;
+
+        private String unFolloweeAlias;
+
+        public UnfollowRequest() {
         }
+
+//        public UnfollowRequest(AuthToken authToken, User unFollower, User unFollowee) {
+//            this.authToken = authToken;
+//            this.unFollower = unFollower;
+//            this.unFollowee = unFollowee;
+//        }
 
         public AuthToken getAuthToken() {
                 return authToken;
@@ -25,16 +31,41 @@ public class UnfollowRequest {
                 this.authToken = authToken;
         }
 
-        public User getUnFollower() {
-                return unFollower;
+//        public User getUnFollower() {
+//                return unFollower;
+//        }
+//        public void setUnFollower(User unFollower) {
+//                this.unFollower = unFollower;
+//        }
+//        public User getUnFollowee() {
+//                return unFollowee;
+//        }
+//        public void setUnFollowee(User unFollowee) {
+//                this.unFollowee = unFollowee;
+//        }
+//}
+
+        public UnfollowRequest(AuthToken authToken, String unFollowerAlias, String unFolloweeAlias) {
+                this.authToken = authToken;
+                this.unFollowerAlias = unFollowerAlias;
+                this.unFolloweeAlias = unFolloweeAlias;
         }
-        public void setUnFollower(User unFollower) {
-                this.unFollower = unFollower;
+
+        public String getUnFollowerAlias() {
+                return unFollowerAlias;
         }
-        public User getUnFollowee() {
-                return unFollowee;
+
+        public void setUnFollowerAlias(String unFollowerAlias) {
+                this.unFollowerAlias = unFollowerAlias;
         }
-        public void setUnFollowee(User unFollowee) {
-                this.unFollowee = unFollowee;
+
+        public String getUnFolloweeAlias() {
+                return unFolloweeAlias;
         }
+
+        public void setUnFolloweeAlias(String unFolloweeAlias) {
+                this.unFolloweeAlias = unFolloweeAlias;
+        }
+
+
 }

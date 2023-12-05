@@ -119,17 +119,15 @@ public class UserService {
         return response;
     }
 
-// aws lambda update-function-code --function-name getUser --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
 
     public GetUserResponse getUser(GetUserRequest request) {
-
         logger.info("Getting user (inside my UserService::GetUser) " + request.getAlias());
-//        try {
+        try {
             return userDAO.getUser(request);
-//        }
-//        catch (Exception e) {
-//            throw new RuntimeException("[Bad Request] User not found");
-//        }
+        }
+        catch (Exception e) {
+            throw new RuntimeException("[Bad Request] User not found");
+        }
     }
 
 

@@ -21,6 +21,8 @@ public class GetFollowingCountTask extends AuthenticatedTask {
     public static final String COUNT_KEY = "count";
     private User targetUser;
 
+    private String alias;
+
     private ServerFacade serverFacade;
 
     private GetFollowingCountResponse response;
@@ -35,7 +37,9 @@ public class GetFollowingCountTask extends AuthenticatedTask {
     @Override
     protected void runTask() {
         try {
-            GetFollowingCountRequest request = new GetFollowingCountRequest(targetUser, authToken);
+
+            alias = targetUser.getAlias();
+            GetFollowingCountRequest request = new GetFollowingCountRequest(alias, authToken);
             response = getServerFacade().getFollowingCount(request, StatusService.GET_FOLLOWING_COUNT_URL_PATH);
 
             if(response.isSuccess()) {

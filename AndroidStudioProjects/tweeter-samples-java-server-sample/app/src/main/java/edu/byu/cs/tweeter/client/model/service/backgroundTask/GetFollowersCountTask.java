@@ -30,6 +30,7 @@ public class GetFollowersCountTask extends AuthenticatedTask {
      * (This can be any user, not just the currently logged-in user.)
      */
     private User targetUser;
+    private String alias;
     /**
      * Message handler that will receive task results.
      */
@@ -46,7 +47,9 @@ public class GetFollowersCountTask extends AuthenticatedTask {
     protected void runTask() {
         try {
 
-            GetFollowersCountRequest request = new GetFollowersCountRequest(targetUser, authToken);
+            alias = targetUser.getAlias();
+
+            GetFollowersCountRequest request = new GetFollowersCountRequest(alias, authToken);
             response = getServerFacade().getFollowersCount(request, FollowService.GET_FOLLOWERS_COUNT_URL_PATH);
 
             if(response.isSuccess()) {
