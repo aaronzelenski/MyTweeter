@@ -35,39 +35,35 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteResult;
 import software.amazon.awssdk.enhanced.dynamodb.model.Page;
 import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 /**
  * A DAO for accessing 'following' data from the database.
  */
-public class FollowDAO implements IFollowDAO {
+public class FollowDAO extends BaseDAO implements IFollowDAO {
 
 
     private static final String TableName = "follows";
     private static final String FollowerHandleAttr = "follower_handle";
     private static final String FolloweeHandleAttr = "followee_handle";
     public static final String IndexName = "follows_index";
-    public final DynamoDbTable<Follow> followDynamoDbTable;
     private static final Logger logger = Logger.getLogger(FollowHandler.class.getName());
 
 
     public FollowDAO() {
-        DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
-                .region(Region.US_EAST_2)
-                .build();
-
-        DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
-                .dynamoDbClient(dynamoDbClient)
-                .build();
-
-        this.followDynamoDbTable = enhancedClient.table(TableName, TableSchema.fromBean(Follow.class));
+        super();
     }
+
 
     @Override
     public FollowResponse follow(FollowRequest request) {
@@ -269,11 +265,10 @@ public class FollowDAO implements IFollowDAO {
                 User foll = convertHandleToUser(follow.getFollowee_handle());
                 follow.setFollowee(foll);
                 followers.add(foll);
-
             }
+
             return new FollowingResponse(followers, result.isHasMorePages());
         } catch (Exception e) {
-//            logger.log(Level.SEVERE, "Failed to get following list: " + e.getMessage(), e);
             throw new RuntimeException("Failed to get following list: " + e.getMessage(), e);
         }
     }
@@ -282,46 +277,38 @@ public class FollowDAO implements IFollowDAO {
         return value != null && !value.isEmpty();
     }
     @Override
-    public GetFollowersResponse getFollowers(GetFollowersRequest request) {
-        List<User> followers = new ArrayList<>();
-        final boolean[] hasMorePages = new boolean[1]; // A lambda expression can only access final variables
+    public DataPage<Follow> getFollowers(GetFollowersRequest request) {
 
-        try {
-            DynamoDbIndex<Follow> index = followDynamoDbTable.index(IndexName);
+        DynamoDbIndex<Follow> index = followDynamoDbTable.index(IndexName);
+        Key key = Key.builder()
+                .partitionValue(request.getFolloweeAlias())
+                .build();
 
-            QueryConditional queryConditional = QueryConditional
-                    .keyEqualTo(Key.builder()
-                            .partitionValue(request.getFolloweeAlias()) // This should be the user being followed
-                            .build());
+        QueryEnhancedRequest.Builder requestBuilder = QueryEnhancedRequest.builder()
+                .queryConditional(QueryConditional.keyEqualTo(key))
+                .limit(request.getLimit());
 
-            QueryEnhancedRequest.Builder requestBuilder = QueryEnhancedRequest.builder()
-                    .queryConditional(queryConditional)
-                    .limit(request.getLimit());
-
-            if (request.getLastFollowerAlias() != null && !request.getLastFollowerAlias().isEmpty()) {
-                Map<String, AttributeValue> startKey = new HashMap<>();
-                startKey.put(FolloweeHandleAttr, AttributeValue.builder().s(request.getFolloweeAlias()).build());
-                startKey.put(FollowerHandleAttr, AttributeValue.builder().s(request.getLastFollowerAlias()).build());
-                requestBuilder.exclusiveStartKey(startKey);
-            }
-
-            QueryEnhancedRequest queryEnhancedRequest = requestBuilder.build();
-            SdkIterable<Page<Follow>> pages = index.query(queryEnhancedRequest);
-
-            pages.stream().limit(1).forEach(page -> {
-                hasMorePages[0] = page.lastEvaluatedKey() != null;
-                page.items().forEach(follow -> {
-                    User follower = convertHandleToUser(follow.getFollower_handle());
-                    followers.add(follower);
-                });
-            });
-
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Failed to get followers: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to get followers: " + e.getMessage(), e);
+        if (isNonEmptyString(request.getLastFollowerAlias())) {
+            Map<String, AttributeValue> startKey = new HashMap<>();
+            startKey.put(FolloweeHandleAttr, AttributeValue.builder().s(request.getFolloweeAlias()).build());
+            startKey.put(FollowerHandleAttr, AttributeValue.builder().s(request.getLastFollowerAlias()).build());
+            requestBuilder.exclusiveStartKey(startKey);
         }
 
-        return new GetFollowersResponse(followers, hasMorePages[0]);
+        QueryEnhancedRequest queryEnhancedRequest = requestBuilder.build();
+
+        DataPage<Follow> result = new DataPage<>();
+        SdkIterable<Page<Follow>> sdkIterable = index.query(queryEnhancedRequest);
+        PageIterable<Follow> pages = PageIterable.create(sdkIterable);
+
+        pages.stream()
+                .limit(1)
+                .forEach((Page<Follow> page) -> {
+                    result.setHasMorePages(page.lastEvaluatedKey() != null);
+                    page.items().forEach(feeds -> result.getValues().add(feeds));
+                });
+
+        return result;
     }
 
 
@@ -330,4 +317,61 @@ public class FollowDAO implements IFollowDAO {
         UserDAO userDAO = new UserDAO();
         return userDAO.userTable.getItem(Key.builder().partitionValue(handle).build());
     }
+
+
+    @Override
+    public void addFollowBatch(List<String> followerAliases, String followTarget) {
+        List<Follow> batchToWrite = new ArrayList<>();
+        for (String aFollowerAlias : followerAliases) {
+            Follow follow = new Follow();
+            follow.setFollower_handle(aFollowerAlias);
+            follow.setFollowee_handle(followTarget);
+
+
+            batchToWrite.add(follow);
+
+            if (batchToWrite.size() == 10) {
+                // package this batch up and send to DynamoDB.
+                writeChunkOfUserDTOs(batchToWrite);
+                batchToWrite = new ArrayList<>();
+            }
+        }
+
+        // write any remaining
+        if (batchToWrite.size() > 0) {
+            // package this batch up and send to DynamoDB.
+            writeChunkOfUserDTOs(batchToWrite);
+        }
+    }
+    private void writeChunkOfUserDTOs(List<Follow> follows) {
+        if(follows.size() > 25)
+            throw new RuntimeException("Too many users to write");
+
+        DynamoDbTable<Follow> table = enhancedClient.table(TableName, TableSchema.fromBean(Follow.class));
+        WriteBatch.Builder<Follow> writeBuilder = WriteBatch.builder(Follow.class).mappedTableResource(table);
+        for (Follow item : follows) {
+            writeBuilder.addPutItem(builder -> builder.item(item));
+        }
+        BatchWriteItemEnhancedRequest batchWriteItemEnhancedRequest = BatchWriteItemEnhancedRequest.builder()
+                .writeBatches(writeBuilder.build()).build();
+
+        try {
+            BatchWriteResult result = enhancedClient.batchWriteItem(batchWriteItemEnhancedRequest);
+
+            // just hammer dynamodb again with anything that didn't get written this time
+            if (result.unprocessedPutItemsForTable(table).size() > 0) {
+                writeChunkOfUserDTOs(result.unprocessedPutItemsForTable(table));
+            }
+
+        } catch (DynamoDbException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
+    }
+
+
+
+
+
+
 }

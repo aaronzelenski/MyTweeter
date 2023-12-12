@@ -12,8 +12,7 @@ aws lambda update-function-code --function-name getUser --zip-file fileb:///User
 aws lambda update-function-code --function-name getFollowersCount --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
 aws lambda update-function-code --function-name getFollowingCount --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
 aws lambda update-function-code --function-name postStatus --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
-
-
+aws lambda update-function-code --function-name postUpdateFeedMessages --zip-file fileb:///Users/thisguyaaron/AndroidStudioProjects/tweeter-samples-java-server-sample/server/build/libs/server-all.jar
 or
 
 
@@ -25,3 +24,12 @@ or
 10240
 
 
+
+the two followers for paul:
+1. @aaron
+2. @debbie
+
+
+    private final static String FOLLOW_TARGET = "@Mickey1";
+            String name = "Micky " + i;
+            String alias = "@Micky" + i;

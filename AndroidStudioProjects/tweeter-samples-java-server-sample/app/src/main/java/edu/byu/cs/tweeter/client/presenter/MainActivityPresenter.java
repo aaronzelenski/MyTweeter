@@ -171,6 +171,7 @@ public class MainActivityPresenter implements UserService.LogoutObserver, Status
 // methods override from StatusService.postStatusObserver
     @Override
     public void postStatusSucceeded(String message) {
+        view.hideInfoMessage();
         view.showSuccessMessage("Successfully posted status");
     }
 

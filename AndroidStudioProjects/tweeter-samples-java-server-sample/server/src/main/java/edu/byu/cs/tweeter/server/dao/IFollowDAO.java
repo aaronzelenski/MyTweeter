@@ -1,6 +1,9 @@
 package edu.byu.cs.tweeter.server.dao;
 
+import java.util.List;
+
 import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.model.domain.Follow;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.service.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.service.request.FollowingRequest;
@@ -25,7 +28,7 @@ public interface IFollowDAO {
 
         FollowingResponse getFollowing(FollowingRequest request);
 
-        GetFollowersResponse getFollowers(GetFollowersRequest request);
+        DataPage<Follow> getFollowers(GetFollowersRequest request);
 
         IsFollowerResponse isFollower(IsFollowerRequest request);
 
@@ -36,4 +39,6 @@ public interface IFollowDAO {
         User convertHandleToUser(String handle);
 
         //void deleteAllFollows();
+
+        void addFollowBatch(List<String> follows, String follower_handle);
 }

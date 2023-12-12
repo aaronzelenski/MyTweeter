@@ -1,9 +1,11 @@
 package edu.byu.cs.tweeter.server.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.model.domain.Follow;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.service.request.FollowRequest;
 import edu.byu.cs.tweeter.model.net.service.request.FollowingRequest;
@@ -20,6 +22,7 @@ import edu.byu.cs.tweeter.model.net.service.response.GetFollowersResponse;
 import edu.byu.cs.tweeter.model.net.service.response.GetFollowingCountResponse;
 import edu.byu.cs.tweeter.model.net.service.response.IsFollowerResponse;
 import edu.byu.cs.tweeter.model.net.service.response.UnfollowResponse;
+import edu.byu.cs.tweeter.server.dao.DataPage;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
 import edu.byu.cs.tweeter.server.dao.IAuthTokenDAO;
 import edu.byu.cs.tweeter.server.dao.IFactoryDAO;
@@ -164,6 +167,7 @@ public class FollowService {
         return followDAO.getFollowing(request);
     }
 
+
     public GetFollowersResponse getFollowers(GetFollowersRequest request){
         	if(request.getFolloweeAlias() == null) {
                 throw new RuntimeException("[Bad Request] Request needs to have a follower alias");
@@ -174,7 +178,24 @@ public class FollowService {
         AuthToken authToken = authDAO.validateToken(request.getAuthToken().toString());
         request.setAuthToken(authToken);
 
-        return followDAO.getFollowers(request);
+        DataPage<Follow> result = followDAO.getFollowers(request);
+        List<String> aliases = getAliases(result);
+        List<User> users = userDAO.getUserList(aliases);
+
+        return new GetFollowersResponse(users, result.isHasMorePages());
+
+
+    }
+
+
+    private List<String> getAliases(DataPage<Follow> followDataPage) {
+        List<String> aliases = new ArrayList<>();
+        for (Follow follow : followDataPage.getValues()) {
+            if(follow != null){
+                aliases.add(follow.getFollower_handle());
+            }
+        }
+        return aliases;
     }
 
 }

@@ -36,6 +36,11 @@ dependencies {
     // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.593'
 
+    // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-sqs
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.12.606'
+
+    implementation 'com.amazonaws:aws-lambda-java-events:3.11.0' // or use the latest available version
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
 
 }
 

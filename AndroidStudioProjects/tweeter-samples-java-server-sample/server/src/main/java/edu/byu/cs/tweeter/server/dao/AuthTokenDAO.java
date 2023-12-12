@@ -14,26 +14,13 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
-public class AuthTokenDAO implements IAuthTokenDAO {
+public class AuthTokenDAO extends BaseDAO implements IAuthTokenDAO {
     private static final String TableName = "authtoken";
     private static DynamoDbClient dynamoDbClient = null;
     private final DynamoDbTable<AuthToken> authTokenTable;
 
     public AuthTokenDAO() {
-        if (dynamoDbClient == null) {
-            synchronized (AuthTokenDAO.class) {
-                if (dynamoDbClient == null) {
-                    dynamoDbClient = DynamoDbClient.builder()
-                            .region(Region.US_EAST_2)
-                            .build();
-                }
-            }
-        }
-
-        DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
-                .dynamoDbClient(dynamoDbClient)
-                .build();
-
+        super();
         this.authTokenTable = enhancedClient.table(TableName, TableSchema.fromBean(AuthToken.class));
     }
 

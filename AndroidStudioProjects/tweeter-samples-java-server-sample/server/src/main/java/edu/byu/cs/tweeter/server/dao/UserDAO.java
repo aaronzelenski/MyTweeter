@@ -11,6 +11,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
+import java.util.ArrayList;
 import java.util.Base64;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
@@ -27,42 +28,29 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteItemEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.BatchWriteResult;
 import software.amazon.awssdk.enhanced.dynamodb.model.DeleteItemEnhancedRequest;
 import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.WriteBatch;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
+
 import java.io.ByteArrayInputStream;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Logger;
 
 
-public class UserDAO implements IUserDAO {
+public class UserDAO extends BaseDAO implements IUserDAO {
 
     private static final String TableName = "users";
-    private static final String BUCKET_NAME = "tweeterprofileimagebucket";
-    private static AmazonS3 s3Client = null;
-    public final DynamoDbTable<User> userTable;
     private static final Logger logger = Logger.getLogger(RegisterHandler.class.getName());
 
 
     public UserDAO() {
-        DynamoDbClient dynamoDbClient = DynamoDbClient.builder()
-                .region(Region.US_EAST_2)
-                .build();
-
-        DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
-                .dynamoDbClient(dynamoDbClient)
-                .build();
-
-        this.userTable = enhancedClient.table(TableName, TableSchema.fromBean(User.class));
-        initializeS3Client();
-    }
-    private static void initializeS3Client() {
-        if (s3Client == null) {
-            s3Client = AmazonS3ClientBuilder.standard()
-                    .withRegion(Regions.US_EAST_2)
-                    .build();
-        }
+        super();
     }
 
     @Override
@@ -169,6 +157,68 @@ public class UserDAO implements IUserDAO {
                     .build();
 
             userTable.deleteItem(deleteRequest);
+        }
+    }
+
+
+    public void addUserBatch(List<User> users) {
+        List<User> batchToWrite = new ArrayList<>();
+        for (User u : users) {
+            batchToWrite.add(u);
+
+            if (batchToWrite.size() == 10) {
+                // package this batch up and send to DynamoDB.
+                writeChunkOfUserDTOs(batchToWrite);
+                batchToWrite = new ArrayList<>();
+            }
+        }
+
+        // write any remaining
+        if (batchToWrite.size() > 0) {
+            // package this batch up and send to DynamoDB.
+            writeChunkOfUserDTOs(batchToWrite);
+        }
+    }
+
+    @Override
+    public List<User> getUserList(List<String> aliases) {
+        List<User> users = new ArrayList<>();
+        for (String alias : aliases) {
+            Key key = Key.builder()
+                    .partitionValue(alias)
+                    .build();
+
+            User user = userTable.getItem(r -> r.key(key));
+            if (user != null) {
+                users.add(user);
+            }
+        }
+        return users;
+    }
+
+    private void writeChunkOfUserDTOs(List<User> users) {
+        if(users.size() > 10)
+            throw new RuntimeException("Too many users to write");
+
+        DynamoDbTable<User> table = enhancedClient.table(TableName, TableSchema.fromBean(User.class));
+        WriteBatch.Builder<User> writeBuilder = WriteBatch.builder(User.class).mappedTableResource(table);
+        for (User item : users) {
+            writeBuilder.addPutItem(builder -> builder.item(item));
+        }
+        BatchWriteItemEnhancedRequest batchWriteItemEnhancedRequest = BatchWriteItemEnhancedRequest.builder()
+                .writeBatches(writeBuilder.build()).build();
+
+        try {
+            BatchWriteResult result = enhancedClient.batchWriteItem(batchWriteItemEnhancedRequest);
+
+            // just hammer dynamodb again with anything that didn't get written this time
+            if (result.unprocessedPutItemsForTable(table).size() > 0) {
+                writeChunkOfUserDTOs(result.unprocessedPutItemsForTable(table));
+            }
+
+        } catch (DynamoDbException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
         }
     }
 

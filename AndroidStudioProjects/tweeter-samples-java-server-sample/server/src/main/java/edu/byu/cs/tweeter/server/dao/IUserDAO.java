@@ -1,5 +1,8 @@
 package edu.byu.cs.tweeter.server.dao;
 
+import java.util.List;
+
+import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.service.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.service.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.service.request.RegisterRequest;
@@ -17,6 +20,10 @@ public interface IUserDAO {
     GetUserResponse getUser(GetUserRequest request);
 
     void deleteAllUsers();
+
+    void addUserBatch(List<User> users);
+
+    List<User> getUserList(List<String> aliases);
 
 
 }

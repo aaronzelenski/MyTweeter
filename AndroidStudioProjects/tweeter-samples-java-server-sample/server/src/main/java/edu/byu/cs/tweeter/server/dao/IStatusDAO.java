@@ -1,5 +1,10 @@
 package edu.byu.cs.tweeter.server.dao;
 
+import java.util.List;
+
+import edu.byu.cs.tweeter.model.domain.Feed;
+import edu.byu.cs.tweeter.model.domain.Status;
+import edu.byu.cs.tweeter.model.net.service.request.BatchPostStatusRequest;
 import edu.byu.cs.tweeter.model.net.service.request.GetFeedRequest;
 import edu.byu.cs.tweeter.model.net.service.request.GetStoryRequest;
 import edu.byu.cs.tweeter.model.net.service.request.PostStatusRequest;
@@ -13,7 +18,9 @@ public interface IStatusDAO {
 
     GetStoryResponse getStory(GetStoryRequest request);
 
-    GetFeedResponse getFeed(GetFeedRequest request);
+    DataPage<Feed> getFeed(GetFeedRequest request);
+
+    void batchUpdateFeeds(List<Feed> feeds);
 
 
 }
