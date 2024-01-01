@@ -32,14 +32,6 @@ import edu.byu.cs.tweeter.server.dao.FollowDAO;
 import edu.byu.cs.tweeter.server.service.FollowService;
 import edu.byu.cs.tweeter.server.service.JsonSerializer;
 
-
-
-// this class is to first get the status
-// then get the followers of that specific user that sent the status
-// then use my DTO (contains my list of followers and status) to send to the queue #2
-// then the queue #2 will send the DTO to the lambda function that will update the feed table
-
-
 public class PostUpdateFeedMessages implements RequestHandler<SQSEvent, Void> {
     private static final Logger logger = Logger.getLogger(PostUpdateFeedMessages.class.getName());
     private static final FollowDAO followDAO = new FollowDAO();
