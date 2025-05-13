@@ -12,7 +12,7 @@ This is a simplified Twitter clone built for **CS 340: Software Design** at **Br
 ## 🛠️ Technologies
 
 - Java
-- Android SDK (if mobile)
+- Android SDK
 - SQL
 - AWS
 
